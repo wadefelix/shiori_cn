@@ -3,6 +3,7 @@ package core
 import (
 	"io"
 	"net/http"
+	urllib "net/url"
 	"time"
 )
 
@@ -17,6 +18,10 @@ func DownloadBookmark(url string) (io.ReadCloser, string, error) {
 		return nil, "", err
 	}
 
+	urlObj, _ := urllib.Parse(url)
+	if cookie, ok := siteCookies[urlObj.Host]; ok {
+		req.Header.Set("Cookie", cookie)
+	}
 	// Send download request
 	req.Header.Set("User-Agent", userAgent)
 	resp, err := httpClient.Do(req)
