@@ -158,6 +158,7 @@ func updateHandler(cmd *cobra.Command, args []string) {
 				}()
 
 				// Download data from internet
+				core.ReadSiteCookiesFromDB(deps.Database)
 				content, contentType, err := core.DownloadBookmark(book.URL)
 				if err != nil {
 					chProblem <- book.ID

@@ -1,0 +1,1 @@
+ALTER TABLE `shiori_system` ADD `site_cookies` TEXT NOT NULL DEFAULT '' AFTER `database_schema_version`;

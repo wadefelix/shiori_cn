@@ -67,6 +67,7 @@ var mysqlMigrations = []migration{
 	newFileMigration("0.8.2", "0.8.3", "mysql/0008_set_modified_at_equal_created_at"),
 	newFileMigration("0.8.3", "0.8.4", "mysql/0009_index_for_created_at"),
 	newFileMigration("0.8.4", "0.8.5", "mysql/0010_index_for_modified_at"),
+	newFileMigration("0.8.5", "0.8.5.1", "mysql/0011_system_alter"),
 }
 
 // MySQLDatabase is implementation of Database interface
@@ -127,6 +128,17 @@ func (db *MySQLDatabase) SetDatabaseSchemaVersion(ctx context.Context, version s
 	}
 
 	return tx.Commit()
+}
+
+func (db *MySQLDatabase) GetSiteCookies(ctx context.Context) (string, error) {
+	var cookies_str string
+
+	err := db.GetContext(ctx, &cookies_str, "SELECT site_cookies FROM shiori_system")
+	if err != nil {
+		return "", errors.WithStack(err)
+	}
+
+	return cookies_str, nil
 }
 
 // SaveBookmarks saves new or updated bookmarks to database.

@@ -114,6 +114,8 @@ type DB interface {
 
 	// RenameTag change the name of a tag.
 	RenameTag(ctx context.Context, id int, newName string) error
+
+	GetSiteCookies(ctx context.Context) (string, error)
 }
 
 type dbbase struct {

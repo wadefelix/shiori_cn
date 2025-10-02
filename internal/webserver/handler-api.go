@@ -22,6 +22,7 @@ import (
 )
 
 func downloadBookmarkContent(deps *dependencies.Dependencies, book *model.BookmarkDTO, dataDir string, request *http.Request, keepTitle, keepExcerpt bool) (*model.BookmarkDTO, error) {
+	core.ReadSiteCookiesFromDB(deps.Database)
 	content, contentType, err := core.DownloadBookmark(book.URL)
 	if err != nil {
 		return nil, fmt.Errorf("下载书签时出错: %s", err)

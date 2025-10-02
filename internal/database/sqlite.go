@@ -119,6 +119,17 @@ func (db *SQLiteDatabase) SetDatabaseSchemaVersion(ctx context.Context, version 
 	return tx.Commit()
 }
 
+func (db *SQLiteDatabase) GetSiteCookies(ctx context.Context) (string, error) {
+	var cookies_str string
+
+	err := db.GetContext(ctx, &cookies_str, "SELECT site_cookies FROM shiori_system")
+	if err != nil {
+		return "", errors.WithStack(err)
+	}
+
+	return cookies_str, nil
+}
+
 // SaveBookmarks saves new or updated bookmarks to database.
 // Returns the saved ID and error message if any happened.
 func (db *SQLiteDatabase) SaveBookmarks(ctx context.Context, create bool, bookmarks ...model.BookmarkDTO) ([]model.BookmarkDTO, error) {

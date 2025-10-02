@@ -66,6 +66,7 @@ func (h *Handler) ApiInsertViaExtension(w http.ResponseWriter, r *http.Request, 
 	var contentBuffer io.Reader
 
 	if request.HTML == "" {
+		core.ReadSiteCookiesFromDB(h.DB)
 		contentBuffer, contentType, _ = core.DownloadBookmark(request.URL)
 	} else {
 		contentType = "text/html; charset=UTF-8"

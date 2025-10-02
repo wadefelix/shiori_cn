@@ -187,6 +187,7 @@ func (r *BookmarksAPIRoutes) updateCache(c *gin.Context) {
 			}()
 
 			// Download data from internet
+			core.ReadSiteCookiesFromDB(r.deps.Database)
 			content, contentType, err := core.DownloadBookmark(book.URL)
 			if err != nil {
 				chProblem <- book.ID

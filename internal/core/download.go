@@ -19,7 +19,7 @@ func DownloadBookmark(url string) (io.ReadCloser, string, error) {
 	}
 
 	urlObj, _ := urllib.Parse(url)
-	if cookie, ok := siteCookies[urlObj.Host]; ok {
+	if cookie, ok := get_site_cookie(urlObj.Host); ok {
 		req.Header.Set("Cookie", cookie)
 	}
 	// Send download request

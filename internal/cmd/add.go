@@ -85,6 +85,7 @@ func addHandler(cmd *cobra.Command, args []string) {
 		cInfo.Println("Downloading article...")
 
 		var isFatalErr bool
+		core.ReadSiteCookiesFromDB(deps.Database)
 		content, contentType, err := core.DownloadBookmark(book.URL)
 		if err != nil {
 			cError.Printf("Failed to download: %v\n", err)
