@@ -1,6 +1,7 @@
 package api_v1
 
 import (
+	"io"
 	"net/http"
 	"runtime"
 
@@ -21,6 +22,8 @@ type SystemAPIRoutes struct {
 func (r *SystemAPIRoutes) Setup(g *gin.RouterGroup) model.Routes {
 	g.Use(middleware.AuthenticationRequired())
 	g.GET("/info", r.infoHandler)
+	g.GET("/sitecookies", r.getSiteCookiesHandler)
+	g.POST("/sitecookies", r.updateSiteCookiesHandler)
 	return r
 }
 
@@ -64,6 +67,35 @@ func (r *SystemAPIRoutes) infoHandler(c *gin.Context) {
 		Database: r.deps.Database.DBx().DriverName(),
 		OS:       runtime.GOOS + " (" + runtime.GOARCH + ")",
 	})
+}
+func (r *SystemAPIRoutes) getSiteCookiesHandler(c *gin.Context) {
+	ctx := context.NewContextFromGin(c)
+	if !ctx.GetAccount().Owner {
+		response.SendError(c, http.StatusForbidden, "Only owners can access this endpoint")
+		return
+	}
+	db := r.deps.Database
+	if content,err := db.GetSiteCookies(ctx); err==nil {
+		response.Send(c, 200, content)
+	}
+}
+func (r *SystemAPIRoutes) updateSiteCookiesHandler(c *gin.Context) {
+	ctx := context.NewContextFromGin(c)
+	if !ctx.GetAccount().Owner {
+		response.SendError(c, http.StatusForbidden, "Only owners can access this endpoint")
+		return
+	}
+	body, err := io.ReadAll(c.Request.Body)
+    if err != nil {
+		response.SendError(c, http.StatusBadRequest, err.Error())
+        return
+    }
+	db := r.deps.Database
+	if err := db.SetSiteCookies(ctx, string(body)); err==nil {
+		response.Send(c, 200, "update success")
+	} else {
+		response.SendError(c, http.StatusBadRequest, err.Error())
+	}
 }
 
 func NewSystemAPIRoutes(logger *logrus.Logger, deps *dependencies.Dependencies) *SystemAPIRoutes {

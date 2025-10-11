@@ -116,6 +116,7 @@ type DB interface {
 	RenameTag(ctx context.Context, id int, newName string) error
 
 	GetSiteCookies(ctx context.Context) (string, error)
+	SetSiteCookies(ctx context.Context, content string) error
 }
 
 type dbbase struct {

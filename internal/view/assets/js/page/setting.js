@@ -76,6 +76,9 @@ var template = `
 				<li><b>数据库引擎:</b> <span>{{system.database}}</span></li>
 				<li><b>操作系统:</b> <span>{{system.os}}</span></li>
 			</ul>
+			<div class="setting-group-footer">
+                <a v-if="activeAccount.owner" @click="showDialogSiteCookies">更新SiteCookies</a>
+            </div>
 	</details>
         <details v-if="activeAccount.owner" open class="setting-group">
             <summary>关于</summary>
@@ -406,6 +409,59 @@ export default {
 						});
 				},
 			});
+		},
+		showDialogSiteCookies() {
+			fetch(new URL("api/v1/system/sitecookies", document.baseURI), {
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: "Bearer " + localStorage.getItem("shiori-token"),
+				},
+			})
+				.then((response) => {
+					if (!response.ok) throw response;
+					return response.json();
+				})
+				.then((json) => {
+					this.showDialog({
+						title: "编辑SiteCookies",
+						content: `SiteCookies`,
+						fields: [{
+						    name: "siteCookies",
+						    label: "{\"www.renwei.net\":\"cookie string\",\"site2\":\"...\",...}",
+							type: "area",
+ 						    value: json.message,
+					    }],
+						mainText: "更新",
+						secondText: "取消",
+						mainClick: (data) => {
+							this.dialog.loading = true;
+							fetch(new URL("api/v1/system/sitecookies", document.baseURI), {
+						        method: "post",
+						        body: data.siteCookies,
+						        headers: {
+							        "Content-Type": "application/json",
+							        Authorization: "Bearer " + localStorage.getItem("shiori-token"),
+						        },
+					        })
+						    .then((response) => {
+								if (!response.ok) throw response;
+								this.dialog.loading = false;
+							    this.dialog.visible = false;
+							    return response;
+						    }).catch((err) => {
+							    this.dialog.loading = false;
+							    this.getErrorMessage(err).then((msg) => {
+								    this.showErrorDialog(msg);
+							    });
+						    });
+						}
+					})
+				})
+				.catch((err) => {
+					this.getErrorMessage(err).then((msg) => {
+						this.showErrorDialog(msg);
+					});
+				});
 		},
 	},
 	mounted() {

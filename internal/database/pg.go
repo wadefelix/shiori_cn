@@ -142,6 +142,14 @@ func (db *PGDatabase) GetSiteCookies(ctx context.Context) (string, error) {
 
 	return cookies_str, nil
 }
+func (db *PGDatabase) SetSiteCookies(ctx context.Context, cookies_str string) error {
+	err := db.withTx(ctx, func(tx *sqlx.Tx) error {
+		_, err := db.ExecContext(ctx, `UPDATE shiori_system SET site_cookies = ?`, cookies_str)
+		return errors.WithStack(err)
+	})
+
+	return errors.WithStack(err)
+}
 
 // SaveBookmarks saves new or updated bookmarks to database.
 // Returns the saved ID and error message if any happened.
