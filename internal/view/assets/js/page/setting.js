@@ -422,40 +422,82 @@ export default {
 					return response.json();
 				})
 				.then((json) => {
+					let fields = Array();
+					const sitesCookies = JSON.parse(json.message);
+					let siteInd = 1;
+					for (let site in sitesCookies) {
+						fields.push(
+							{
+								name: "site" + siteInd,
+								label: "site domainname",
+								value: site,
+							},
+							{
+								name: "site" + siteInd + "cookies",
+								label: "site cookies",
+								value: sitesCookies[site],
+							},
+						);
+						siteInd = siteInd + 1;
+					}
+					fields.push(
+						{
+							name: "site" + siteInd,
+							label: "site domainname",
+							value: "",
+						},
+						{
+							name: "site" + siteInd + "cookies",
+							label: "site cookies",
+							value: "",
+						},
+					);
 					this.showDialog({
 						title: "编辑SiteCookies",
 						content: `SiteCookies`,
-						fields: [{
-						    name: "siteCookies",
-						    label: "{\"www.renwei.net\":\"cookie string\",\"site2\":\"...\",...}",
-							type: "area",
- 						    value: json.message,
-					    }],
+						fields: fields,
 						mainText: "更新",
 						secondText: "取消",
 						mainClick: (data) => {
 							this.dialog.loading = true;
+							let sitesCookies = {};
+							let siteInd = 1;
+							while (
+								data.hasOwnProperty(`site${siteInd}`) &&
+								data.hasOwnProperty(`site${siteInd}cookies`)
+							) {
+								const site = data[`site${siteInd}`];
+								const siteCookies = data[`site${siteInd}cookies`];
+								if (site && siteCookies) {
+									sitesCookies[site] = siteCookies;
+								} else {
+									break;
+								}
+								siteInd = siteInd + 1;
+							}
 							fetch(new URL("api/v1/system/sitecookies", document.baseURI), {
-						        method: "post",
-						        body: data.siteCookies,
-						        headers: {
-							        "Content-Type": "application/json",
-							        Authorization: "Bearer " + localStorage.getItem("shiori-token"),
-						        },
-					        })
-						    .then((response) => {
-								if (!response.ok) throw response;
-								this.dialog.loading = false;
-							    this.dialog.visible = false;
-							    return response;
-						    }).catch((err) => {
-							    this.dialog.loading = false;
-							    this.getErrorMessage(err).then((msg) => {
-								    this.showErrorDialog(msg);
-							    });
-						    });
-						}
-					})
+								method: "post",
+								body: JSON.stringify(sitesCookies),
+								headers: {
+									"Content-Type": "application/json",
+									Authorization:
+										"Bearer " + localStorage.getItem("shiori-token"),
+								},
+							})
+								.then((response) => {
+									if (!response.ok) throw response;
+									this.dialog.loading = false;
+									this.dialog.visible = false;
+									return response;
+								})
+								.catch((err) => {
+									this.dialog.loading = false;
+									this.getErrorMessage(err).then((msg) => {
+										this.showErrorDialog(msg);
+									});
+								});
+						},
+					});
 				})
 				.catch((err) => {
 					this.getErrorMessage(err).then((msg) => {
